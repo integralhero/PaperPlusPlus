@@ -30,7 +30,8 @@ def bigramCost(a, b, dict):
 	if (a,b) not in dict:
 		return COST_MAX
 	return 1/(math.log(dict[(a,b)])+1)
-
+def unigramCost(a):
+	return 1/(math.log(dict[(a,b)])+1)
 
 
 dict = computePhraseFrequencies("my name is brian. is brian home?")
