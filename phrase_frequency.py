@@ -1,4 +1,9 @@
 import re, math, os
+import lxml.html
+from lxml.cssselect import CSSSelector
+import requests
+import urllib2
+import string
 
 def computePhraseFrequencies(text, data):
 	print "    Generating phrases..."
@@ -36,7 +41,9 @@ COST_MAX = 100.0
 def bigramCost(a, b, data):
 	if (a, b) not in data:
 		return COST_MAX
-	return 1 / (math.log(data[(a,b)]) + 1)
+	return 1/(math.log(dict[(a,b)])+1)
+def unigramCost(a):
+	return 1/(math.log(len(a))+1)
 
 def readCorpus(filename, data):
 	print ">>> Reading corpus ({})".format(filename)
@@ -44,16 +51,60 @@ def readCorpus(filename, data):
 		text = corpusFile.read()
 		computePhraseFrequencies(text, data)
 
-corpusesFolder = "corpuses"
-corpusFiles = []
-for filename in os.listdir(corpusesFolder):
-	if filename.endswith(".txt"):
-		corpusFiles.append(corpusesFolder + "/" + filename)
-data = {}
-for corpus in corpusFiles:
-	readCorpus(corpus, data)
+def readAllCorpuses():
+	corpusesFolder = "corpuses"
+	corpusFiles = []
+	for filename in os.listdir(corpusesFolder):
+		if filename.endswith(".txt"):
+			corpusFiles.append(corpusesFolder + "/" + filename)
+	data = {}
+	for corpus in corpusFiles:
+		readCorpus(corpus, data)
+	return data
 
-# data = readCorpus("leo-will.txt", None)
+def pullCorpus():
+	domain = "https://archive.org"
+	root_url = "https://archive.org"
+	url = "https://archive.org/details/gutenberg"
+	r = requests.get(url)
+	tree = lxml.html.fromstring(r.text)
+	sel = CSSSelector('#ikind--downloads .item-ia .item-ttl a')
+	results = sel(tree)
+
+	text_files = []
+	top_level = []
+	for x in results:
+		top_level.append(x.get("href"))
+	for i in top_level:
+		complete_url = root_url + i
+		ar = requests.get(complete_url)
+		book_tree = lxml.html.fromstring(ar.text)
+		book_sel = CSSSelector('#quickdown3 .format-file a')
+		for n in book_sel(book_tree):
+			link_to = n.get("href")
+			download_url = domain + link_to
+			if download_url[-4:] == ".txt":
+				text_files.append(download_url)
+
+	texts = []
+	for dl_url in text_files:
+		og = requests.get(dl_url)
+		texts.append(og.text)
+	return texts
+		
+
+	# match = results[0]
+	# data = [result.text for result in results]
+	# return list(data)
+
+
+#data = readCorpus("alice_in_wonderland.txt")
 # dict = computePhraseFrequencies("my name is brian. is brian home?")
+#print bigramCost("they", "both", data)
 
-print bigramCost("for", "the past", data)
+text_files = pullCorpus()
+for i in range(0, len(text_files)):
+	s = text_files[i]
+	output = open('test' + str(i) + '.txt','wb')
+	output.write(s.encode("ascii", errors="ignore"))
+	output.close()
