@@ -1,16 +1,18 @@
-import re, math
+import re, math, os
 
-def computePhraseFrequencies(text):
-	print "Generating phrases..."
+def computePhraseFrequencies(text, data):
+	print "    Generating phrases..."
 	text = text.lower()
 	phrases = re.split("[.,?;:!]", text)
 	for i, phrase in enumerate(phrases):
 		phrases[i] = phrase.strip()
 
-	print "Generated {} phrases, analyzing phrase-gram frequencies...".format(len(phrases))
-	frequencies = {}
+	print "    Generated {} phrases, analyzing phrase-gram frequencies...".format(len(phrases))
+	if data is None:
+		frequencies = {}
+	else:
+		frequencies = data
 	for phrase in phrases:
-
 		if len(phrase) == 0:
 			continue
 		words = phrase.split(" ")
@@ -27,7 +29,7 @@ def computePhraseFrequencies(text):
 						frequencies[gramPair] += 1
 					else:
 						frequencies[gramPair] = 1
-	print "Finished analyzing."
+	print "    Finished analyzing."
 	return frequencies
 
 COST_MAX = 100.0
@@ -36,14 +38,22 @@ def bigramCost(a, b, data):
 		return COST_MAX
 	return 1 / (math.log(data[(a,b)]) + 1)
 
-def readCorpus(filename):
+def readCorpus(filename, data):
+	print ">>> Reading corpus ({})".format(filename)
 	with open(filename) as corpusFile:
 		text = corpusFile.read()
-		data = computePhraseFrequencies(text)
-		return data
-	return None
+		computePhraseFrequencies(text, data)
 
-data = readCorpus("alice_in_wonderland.txt")
+corpusesFolder = "corpuses"
+corpusFiles = []
+for filename in os.listdir(corpusesFolder):
+	if filename.endswith(".txt"):
+		corpusFiles.append(corpusesFolder + "/" + filename)
+data = {}
+for corpus in corpusFiles:
+	readCorpus(corpus, data)
+
+# data = readCorpus("leo-will.txt", None)
 # dict = computePhraseFrequencies("my name is brian. is brian home?")
-print bigramCost("they", "both", data)
 
+print bigramCost("for", "the past", data)
