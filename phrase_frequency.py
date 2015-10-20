@@ -2,6 +2,8 @@ import re, math
 import lxml.html
 from lxml.cssselect import CSSSelector
 import requests
+import urllib2
+import string
 
 def computePhraseFrequencies(text):
 	print "Generating phrases..."
@@ -88,4 +90,10 @@ def pullCorpus():
 # dict = computePhraseFrequencies("my name is brian. is brian home?")
 #print bigramCost("they", "both", data)
 
-pullCorpus()
+text_files = pullCorpus()
+for i in range(0, len(text_files)):
+	s = text_files[i]
+	output = open('test' + str(i) + '.txt','wb')
+	output.write(s.encode("ascii", errors="ignore"))
+	output.close()
+
