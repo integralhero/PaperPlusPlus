@@ -4,6 +4,7 @@ from lxml.cssselect import CSSSelector
 import requests
 import urllib2
 import string
+import thesaurus
 
 def computePhraseFrequencies(text, data):
 	print "    Generating phrases..."
@@ -102,9 +103,23 @@ def pullCorpus():
 # dict = computePhraseFrequencies("my name is brian. is brian home?")
 #print bigramCost("they", "both", data)
 
-text_files = pullCorpus()
-for i in range(0, len(text_files)):
-	s = text_files[i]
-	output = open('test' + str(i) + '.txt','wb')
-	output.write(s.encode("ascii", errors="ignore"))
-	output.close()
+# text_files = pullCorpus()
+# for i in range(0, len(text_files)):
+# 	s = text_files[i]
+# 	output = open('test' + str(i) + '.txt','wb')
+# 	output.write(s.encode("ascii", errors="ignore"))
+# 	output.close()
+
+def baseline(text):
+	text = text.translate(text.maketrans("",""), string.punctuation)
+	words = text.split(" ")
+	for i, word in enumerate(words):
+		print "Processing word {} out of {}".format(i + 1, len(words))
+		relacements = browseWord(word)
+		if len(replacements) > 0:
+			word = replacements[0]
+	replacedSentence = " ".join(words)
+	print ""
+	print replacedSentence
+
+baseline("my name is brian.")

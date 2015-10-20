@@ -11,4 +11,3 @@ def browseWord(word):
 	match = results[0]
 	data = [result.text for result in results]
 	return list(data)
-
