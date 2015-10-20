@@ -1,4 +1,4 @@
-import re
+import re, math
 
 def computePhraseFrequencies(text):
 	phrases = re.split("[.,?;:!]", text)
@@ -25,4 +25,13 @@ def computePhraseFrequencies(text):
 						frequencies[gramPair] = 1
 	return frequencies
 
-print computePhraseFrequencies("my name is brian. is brian home?")
+COST_MAX = 1000.0
+def bigramCost(a, b, dict):
+	if (a,b) not in dict:
+		return COST_MAX
+	return 1/(math.log(dict[(a,b)])+1)
+
+
+
+dict = computePhraseFrequencies("my name is brian. is brian home?")
+print bigramCost("is","brian", dict)
