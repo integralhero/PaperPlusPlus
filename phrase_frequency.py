@@ -5,6 +5,26 @@ import requests
 import urllib2
 import string
 import thesaurus
+from random import randint
+
+def computeSingleWordFreq(text, data):
+	if data is None:
+		frequencies = {}
+	else:
+		frequencies = data
+	print "    Generating phrases..."
+	text = text.lower()
+	phrases = re.split("[.,?;:!]", text)
+	for i, phrase in enumerate(phrases):
+		phrases[i] = phrase.strip()
+	for phrase in phrases:
+		words = phrase.split(" ")
+		for word in words:
+			if word in frequencies:
+				frequencies[word] += 1
+			else:
+				frequencies[word] = 1
+	return frequencies
 
 def computePhraseFrequencies(text, data):
 	print "    Generating phrases..."
@@ -42,15 +62,19 @@ COST_MAX = 100.0
 def bigramCost(a, b, data):
 	if (a, b) not in data:
 		return COST_MAX
-	return 1/(math.log(dict[(a,b)])+1)
-def unigramCost(a):
-	return 1/(math.log(len(a))+1)
+	return 1/(math.log(data[(a,b)])+1)
+def unigramCost(a, data):
+	if a.lower() not in data:
+		return COST_MAX
+
+	return 1/(math.log(data[(a.lower())])+1)
 
 def readCorpus(filename, data):
 	print ">>> Reading corpus ({})".format(filename)
 	with open(filename) as corpusFile:
 		text = corpusFile.read()
-		computePhraseFrequencies(text, data)
+		# computePhraseFrequencies(text, data)
+		computeSingleWordFreq(text, data)
 
 def readAllCorpuses():
 	corpusesFolder = "corpuses"
@@ -62,6 +86,18 @@ def readAllCorpuses():
 	for corpus in corpusFiles:
 		readCorpus(corpus, data)
 	return data
+
+def testStr(str, dict):
+	avg = 0.0
+	words = str.split(" ")
+	for i in range(0, len(words)):
+		cost = unigramCost(words[i], dict)
+		avg += cost
+	return avg / float(len(words))
+
+
+
+
 
 def pullCorpus():
 	domain = "https://archive.org"
@@ -111,15 +147,28 @@ def pullCorpus():
 # 	output.close()
 
 def baseline(text):
-	text = text.translate(text.maketrans("",""), string.punctuation)
-	words = text.split(" ")
+	# text = text.translate(text.maketrans("",""), string.punctuation)
+	words = text.lower().split(" ")
+	newstr = []
 	for i, word in enumerate(words):
 		print "Processing word {} out of {}".format(i + 1, len(words))
-		relacements = browseWord(word)
+		replacements = thesaurus.browseWord(word)
 		if len(replacements) > 0:
-			word = replacements[0]
-	replacedSentence = " ".join(words)
+			newstr.append(replacements[randint(0,len(replacements)-1)])
+	replacedSentence = " ".join(newstr)
 	print ""
+	print text.lower()
 	print replacedSentence
+	return replacedSentence
 
-baseline("my name is brian.")
+print "Reading in corpuses in /corpuses\n"
+dictFreq = readAllCorpuses()
+inputThing = ""
+while(True):
+	inputThing = raw_input("Type a phrase: ")
+	if len(inputThing) == 0:
+		break
+	newsentence = baseline(inputThing)
+	print "Cost for orig: " + str(testStr(inputThing, dictFreq))
+	print "Cost for mod: " + str(testStr(newsentence, dictFreq))
+
