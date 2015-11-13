@@ -136,7 +136,7 @@ def getWordSimilarity(word1, word2):
 		deltaCost = math.sqrt(-deltaLength)
 
 	cost = (synonymn_relevance_weight * vectorDistance) + (delta_cost_weight * deltaCost) + 5
-	print("word1: {} word2: {} distance: {} deltaLength: {} deltaCost: {} cost: {}").format(word1, word2, vectorDistance, deltaLength, deltaCost, cost)
+	# print("word1: {} word2: {} distance: {} deltaLength: {} deltaCost: {} cost: {}").format(word1, word2, vectorDistance, deltaLength, deltaCost, cost)
 	if cost < 0:
 		return 0
 	return cost
@@ -172,5 +172,12 @@ def segmentWords(query):
 	segmented_words = ucs.actions
 	return (" ").join(segmented_words)
 
-print("")
-print segmentWords("the boy bought flowers for the girl")
+inputThing = ""
+while(True):
+	print("")
+	inputThing = raw_input("Type a phrase: ")
+	print("Processing...")
+	print("")
+	if len(inputThing) == 0:
+		break
+	print segmentWords(inputThing)
