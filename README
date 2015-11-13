@@ -1,0 +1,13 @@
+The main program is currently implemented in programs/util.py.
+
+When running for the first time, open Makefile and uncomment the get-wiki
+and process-wiki commands. Run "sudo python setup.py install". This process
+can take up to an hour! Remember to comment these lines out again after you're
+done or it will try to redownload and process the corpus.
+
+git ignore the .model files, they are over 450Mb each.
+
+After the corpus is downloaded you can run "python programs/util.py". Any time
+you make a change to glove/glove.py you have to recompile by running
+"sudo python setup.py install". If it hangs after a while, just kill the
+program.

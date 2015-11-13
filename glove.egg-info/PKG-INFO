@@ -1,0 +1,11 @@
+Metadata-Version: 1.1
+Name: glove
+Version: 0.0.1
+Summary: Python implementation of Global Vectors for Word Representation (GloVe)
+Home-page: https://github.com/maciejkula/glove-python
+Author: Maciej Kula
+Author-email: UNKNOWN
+License: Apache 2.0
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
