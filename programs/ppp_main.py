@@ -4,16 +4,25 @@ from lxml.cssselect import CSSSelector
 import requests
 import pprint
 import numpy
+import gensim, nltk
+import json
+import urllib2
 from glove import Glove
 from glove import Corpus
 
 MODEL_FILE = "glove.model"
-IGNORE_WORDS = ["you", "the", "is", "that", "i", "a", "this", "am", "and", "was", "so", "to", "too", "it", "not", "no", "with", "these", "those", "who", "any", "how", "why", "either", "neither", "an", "or", "for"]
+IGNORE_WORDS = ["you", "the", "is", "that", "i", "a", "this", "am", "and", "was", "so", "to", "too", "it", "not", "no", "with", "these", "those", "who", "any", "how", "why", "either", "neither", "an", "or", "for", "both"]
+THESAURUS_API_URL = "http://words.bighugelabs.com/api/2/a3ac0f829c4bc4960c74078b6e4ed9b1/"
+NLTK_DATA = "/Users/brian/Downloads/nltk_data"
 
 class PaperPlusPlus:
-	
+
 	def __init__(self):
 		self.glove = None
+		self.thesaurusCache = {}
+		self.currentSentence = None
+		self.currentSentencePartsOfSpeech = None
+		nltk.data.path.append(NLTK_DATA)
 
 	def getSynonyms(self, word):
 		url = "http://www.thesaurus.com/browse/"+ word
@@ -28,6 +37,27 @@ class PaperPlusPlus:
 		match = results[0]
 		data = [result.text for result in results]
 		return list(data)
+
+	def getSynonyms(self, word, index):
+		if word in IGNORE_WORDS:
+			return [word]
+		partOfSpeech = self.currentSentencePartsOfSpeech[index]
+		if (word, partOfSpeech) in self.thesaurusCache:
+			return self.thesaurusCache[(word, partOfSpeech)]
+		else:
+			url = "http://words.bighugelabs.com/api/2/a3ac0f829c4bc4960c74078b6e4ed9b1/" + word + "/json"
+			print(url)
+			data = json.load(urllib2.urlopen(url))
+			if partOfSpeech == "":
+				synonyms = []
+				for pos in data:
+					synonyms.append(list(data[pos]["syn"]))
+				self.thesaurusCache[(word, partOfSpeech)] = synonyms
+				return synonyms
+			else:
+				synonyms = list(data[partOfSpeech]["syn"])
+				self.thesaurusCache[(word, partOfSpeech)] = synonyms
+				return synonyms
 		
 	def loadGloveModel(self, modelFile = MODEL_FILE):
 		print("Loading pre-trained GloVe model \"{}\"...").format(modelFile)
@@ -45,6 +75,29 @@ class PaperPlusPlus:
 		if vector1 is None or vector2 is None:
 			return 5
 		return numpy.linalg.norm(vector1 - vector2)
+
+	def setSentence(self, sentence):
+		self.currentSentence = sentence
+
+	def analyzePartsOfSpeech(self):
+		if self.currentSentence is None:
+			return
+		tokenized = nltk.word_tokenize(self.currentSentence)
+		tags = nltk.pos_tag(tokenized)
+		self.currentSentencePartsOfSpeech = []
+		for tag in tags:
+			pos = tag[1]
+			if pos.startswith("JJ"):
+				self.currentSentencePartsOfSpeech.append("adjective")
+			elif pos.startswith("NN"):
+				self.currentSentencePartsOfSpeech.append("noun")
+			elif pos.startswith("RB"):
+				self.currentSentencePartsOfSpeech.append("adverb")
+			elif pos.startswith("VB"):
+				self.currentSentencePartsOfSpeech.append("verb")
+			else:
+				self.currentSentencePartsOfSpeech.append("")
+		print("Parts of speech: {}", self.currentSentencePartsOfSpeech)
 
 # ppp = PaperPlusPlus()
 # ppp.loadGloveModel(MODEL_FILE)

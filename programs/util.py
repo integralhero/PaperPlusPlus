@@ -141,6 +141,8 @@ def getWordSimilarity(word1, word2):
 		return 0
 	return cost
 
+parts_of_speech = []
+
 class ShittySearch(SearchProblem):
 	def __init__(self, query, costFunc):
 		self.query = query
@@ -149,13 +151,13 @@ class ShittySearch(SearchProblem):
 		return (SENTENCE_BEGIN, 0)
 	def isGoal(self, state):
 		return state[1] == len(self.query.split(" "))
-	def succAndCost(self,state):
+	def succAndCost(self, state):
 		results = []
 		sentence = list(self.query.split(" "))
 		if len(sentence) <= state[1]:
 			return results
 		eval_word = sentence[state[1]]
-		synonyms = ppp.getSynonyms(eval_word)
+		synonyms = ppp.getSynonyms(eval_word, state[1])
 		for syn in list(synonyms):
 			#print (state, syn, sentence[state[1]])
 			results.append((syn, (syn, state[1] + 1), self.costFunc(eval_word, syn)))
@@ -176,8 +178,11 @@ inputThing = ""
 while(True):
 	print("")
 	inputThing = raw_input("Type a phrase: ")
-	print("Processing...")
-	print("")
 	if len(inputThing) == 0:
 		break
+	ppp.setSentence(inputThing)
+	print("Processing...")
+	print("   Analyzing parts of speech...")
+	ppp.analyzePartsOfSpeech()
+	print("   Performing UCS...")
 	print segmentWords(inputThing)
