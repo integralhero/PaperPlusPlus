@@ -95,10 +95,6 @@ def testStr(str, dict):
 		avg += cost
 	return avg / float(len(words))
 
-
-
-
-
 def pullCorpus():
 	domain = "https://archive.org"
 	root_url = "https://archive.org"

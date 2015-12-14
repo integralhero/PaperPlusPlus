@@ -119,7 +119,7 @@ ppp = PaperPlusPlus()
 ppp.loadGloveModel()
 
 synonymn_relevance_weight = 0.7
-delta_cost_weight = 0.1
+delta_cost_weight = 0.4
 
 def getWordSimilarity(word1, word2):
 	w1 = word1.encode("utf-8").strip()
@@ -143,7 +143,7 @@ def getWordSimilarity(word1, word2):
 
 parts_of_speech = []
 
-class ShittySearch(SearchProblem):
+class PaperPlusPlusSearch(SearchProblem):
 	def __init__(self, query, costFunc):
 		self.query = query
 		self.costFunc = costFunc
@@ -168,7 +168,7 @@ def segmentWords(query):
 		return ''
 
 	ucs = UniformCostSearch(verbose=0)
-	ucs.solve(ShittySearch(query, getWordSimilarity))
+	ucs.solve(PaperPlusPlusSearch(query, getWordSimilarity))
 
 	# BEGIN_YOUR_CODE (around 3 lines of code expected)
 	segmented_words = ucs.actions

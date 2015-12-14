@@ -45,13 +45,16 @@ class PaperPlusPlus:
 		if (word, partOfSpeech) in self.thesaurusCache:
 			return self.thesaurusCache[(word, partOfSpeech)]
 		else:
-			url = "http://words.bighugelabs.com/api/2/a3ac0f829c4bc4960c74078b6e4ed9b1/" + word + "/json"
-			print(url)
-			data = json.load(urllib2.urlopen(url))
+			url = THESAURUS_API_URL + word + "/json"
+			try:
+				data = json.load(urllib2.urlopen(url))
+			except:
+				return [word]
 			if partOfSpeech == "":
 				synonyms = []
 				for pos in data:
-					synonyms.append(list(data[pos]["syn"]))
+					if "syn" in data[pos]:
+						synonyms = synonyms + list(data[pos]["syn"])
 				self.thesaurusCache[(word, partOfSpeech)] = synonyms
 				return synonyms
 			else:
@@ -97,7 +100,7 @@ class PaperPlusPlus:
 				self.currentSentencePartsOfSpeech.append("verb")
 			else:
 				self.currentSentencePartsOfSpeech.append("")
-		print("Parts of speech: {}", self.currentSentencePartsOfSpeech)
+		# print("Parts of speech: " + self.currentSentencePartsOfSpeech)
 
 # ppp = PaperPlusPlus()
 # ppp.loadGloveModel(MODEL_FILE)
